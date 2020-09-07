@@ -43,10 +43,6 @@ DallasTemperature sensors(&oneWire);
 
 DeviceAddress waterTemperatureDeviceAddress;
 
-unsigned long int avgValue; //Store the average value of the sensor feedback
-float b;
-int buf[10], temp;
-
 // function to print a device address
 void printDeviceAddress(DeviceAddress deviceAddress)
 {
@@ -161,6 +157,9 @@ void printPh()
 
 void checkPh()
 {
+    unsigned long int avgValue; //Store the average value of the sensor feedback
+    float b;
+    int buf[10], temp;
     for (int i = 0; i < 10; i++) //Get 10 sample value from the sensor for smooth the value
     {
         buf[i] = analogRead(pin::ph_sensor);
@@ -183,6 +182,7 @@ void checkPh()
         avgValue += buf[i];
     float phValue = (float)avgValue * 5.0 / 1024 / 6; //convert the analog into millivolt
     sensor::ph = 3.5 * phValue;                       //convert the millivolt into pH value
+    printPh();
 }
 
 void setup()
