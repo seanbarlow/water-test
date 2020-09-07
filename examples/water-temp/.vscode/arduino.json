@@ -1,0 +1,6 @@
+{
+    "sketch": "app.ino",
+    "board": "arduino:megaavr:uno2018",
+    "configuration": "mode=on",
+    "port": "COM3"
+}
