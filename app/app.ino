@@ -30,6 +30,7 @@ namespace sensor
     unsigned int tds = 0;
     float waterTemp = 0;
     float ecCalibration = 1;
+    float ph = 0;
 } // namespace sensor
 
 hd44780_pinIO lcd(pin::lcd_rs, pin::lcd_rw, pin::lcd_en, pin::lcd_db4, pin::lcd_db5, pin::lcd_db6, pin::lcd_db7);
@@ -49,11 +50,26 @@ int buf[10], temp;
 // function to print a device address
 void printDeviceAddress(DeviceAddress deviceAddress)
 {
-  for (uint8_t i = 0; i < 8; i++)
-  {
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
-  }
+    for (uint8_t i = 0; i < 8; i++)
+    {
+        if (deviceAddress[i] < 16)
+            Serial.print("0");
+        Serial.print(deviceAddress[i], HEX);
+    }
+}
+
+void printTemperature(float tempC)
+{
+    // print to serial
+    Serial.print("Temp C: ");
+    Serial.print(tempC);
+    Serial.print(" Temp F: ");
+    Serial.print(DallasTemperature::toFahrenheit(tempC), 2);
+
+    //print to lcd
+    lcd.setCursor(7, 1);
+    lcd.print("F:");
+    lcd.print(DallasTemperature::toFahrenheit(sensor::waterTemp), 0);
 }
 
 void setupTemperatureDevices()
@@ -103,51 +119,47 @@ void checkWaterTemperature()
 {
     sensors.requestTemperatures();
     sensor::waterTemp = sensors.getTempC(waterTemperatureDeviceAddress);
+    printTemperature(sensor::waterTemp);
 }
 
-void printTemperature(float tempC)
+void printTDS()
 {
-    Serial.print("Temp C: ");
-    Serial.print(tempC);
-    Serial.print(" Temp F: ");
-    Serial.print(DallasTemperature::toFahrenheit(tempC), 2);
-}
-
-void checkTDS()
-{
-
-    float rawEc = analogRead(pin::tds_sensor) * device::aref / 1024.0;                                          // read the analog value more stable by the median filtering algorithm, and convert to voltage value
-    float temperatureCoefficient = 1.0 + 0.02 * (sensor::waterTemp - 25.0);                                     // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
-    sensor::ec = (rawEc / temperatureCoefficient) * sensor::ecCalibration;                                      // temperature and calibration compensation
-    sensor::tds = (133.42 * pow(sensor::ec, 3) - 255.86 * sensor::ec * sensor::ec + 857.39 * sensor::ec) * 0.5; //convert voltage value to tds value
     Serial.print("TDS:");
     Serial.println(sensor::tds);
     Serial.print("EC:");
     Serial.println(sensor::ec, 2);
 
+    // set the cursor the fiest line and 1st character
     lcd.setCursor(0, 0);
     lcd.print("TDS: ");
     lcd.print(sensor::tds);
     lcd.print(" EC:");
     lcd.print(sensor::ec, 2);
-    lcd.setCursor(7, 1);
-    lcd.print(" Temp:");
-    lcd.print(DallasTemperature::toFahrenheit(sensor::waterTemp), 0);
 }
 
-void setup()
+void checkTDS()
 {
-    //pinMode(13, OUTPUT);
-    Serial.begin(115200);
-    Serial.println("Ready"); //Test the serial monitor
-        // set up the LCD's number of columns and rows:
-    lcd.begin(16, 2);
-    // Print a message to the LCD.
-    lcd.print("Ready");
-    setupTemperatureDevices();
+    float rawEc = analogRead(pin::tds_sensor) * device::aref / 1024.0;                                          // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+    float temperatureCoefficient = 1.0 + 0.02 * (sensor::waterTemp - 25.0);                                     // temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+    sensor::ec = (rawEc / temperatureCoefficient) * sensor::ecCalibration;                                      // temperature and calibration compensation
+    sensor::tds = (133.42 * pow(sensor::ec, 3) - 255.86 * sensor::ec * sensor::ec + 857.39 * sensor::ec) * 0.5; //convert voltage value to tds value
+    printTDS();
 }
 
-void loop()
+void printPh()
+{
+    Serial.print("    pH:");
+    Serial.print(sensor::ph, 2);
+    Serial.println(" ");
+    // set the cursor to column 0, line 1
+    // (note: line 1 is the second row, since counting begins with 0):
+    lcd.setCursor(0, 1);
+    // print the number Ph:
+    lcd.print("pH:");
+    lcd.print(sensor::ph, 2);
+}
+
+void checkPh()
 {
     for (int i = 0; i < 10; i++) //Get 10 sample value from the sensor for smooth the value
     {
@@ -170,19 +182,23 @@ void loop()
     for (int i = 2; i < 8; i++) //take the average value of 6 center sample
         avgValue += buf[i];
     float phValue = (float)avgValue * 5.0 / 1024 / 6; //convert the analog into millivolt
-    phValue = 3.5 * phValue;                          //convert the millivolt into pH value
-    Serial.print("    pH:");
-    Serial.print(phValue, 2);
-    Serial.println(" ");
-    // set the cursor to column 0, line 1
-    // (note: line 1 is the second row, since counting begins with 0):
-    lcd.setCursor(0, 1);
-    // print the number of seconds since reset:
-    lcd.print("pH:");
-    lcd.print(phValue, 2);
-    // checkTemperaure();
+    sensor::ph = 3.5 * phValue;                       //convert the millivolt into pH value
+}
+
+void setup()
+{
+    Serial.begin(115200);
+    Serial.println("Initializing..."); //Test the serial monitor
+    lcd.begin(16, 2);
+    // Print a message to the LCD.
+    lcd.print("Initializing...");
+    setupTemperatureDevices();
+}
+
+void loop()
+{
+    checkPh();
+    checkWaterTemperature();
     checkTDS();
-    //digitalWrite(13, HIGH);
-    delay(800);
-    //digitalWrite(13, LOW);
+    delay(1000);
 }
