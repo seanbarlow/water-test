@@ -3,6 +3,7 @@
         {
             "name": "Win32",
             "includePath": [
+                "C:\\Users\\SeanBarlow\\OneDrive - 3Cloud, LLC\\Documents\\Arduino\\libraries\\arduino_869365\\src",
                 "C:\\Users\\SeanBarlow\\OneDrive - 3Cloud, LLC\\Documents\\Arduino\\libraries\\OneWire",
                 "C:\\Users\\SeanBarlow\\OneDrive - 3Cloud, LLC\\Documents\\Arduino\\libraries\\DallasTemperature",
                 "C:\\Users\\SeanBarlow\\OneDrive - 3Cloud, LLC\\Documents\\Arduino\\libraries\\hd44780",
