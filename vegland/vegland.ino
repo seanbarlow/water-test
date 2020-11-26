@@ -5,7 +5,7 @@ namespace timing
 {
     // 1 second
     const long oneSecond = 1000;
-    const long fiveSeconds = oneSecond * 5;
+    const long thirtySeconds = oneSecond * 30;
     // one minute
     const long oneMinute = oneSecond * 60;
     // 60 minutes
@@ -136,7 +136,7 @@ void checkPump(unsigned long currentMillis)
     if (sensor::pumpStatus)
     {
         // make sure the pump only runs for 4.5 minutes
-        if (currentMillis - timing::pumpMillis >= timing::fiveSeconds)
+        if (currentMillis - timing::pumpMillis >= timing::thirtySeconds)
         {
             pumpOff();
             timing::pumpMillis = currentMillis;
@@ -164,7 +164,6 @@ void setup()
     setupLight();
     lightOn();
     setupPump();
-    pumpOn();
 }
 
 void loop()

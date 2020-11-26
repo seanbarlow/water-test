@@ -2,5 +2,5 @@
     "sketch": "app\\app.ino",
     "board": "arduino:megaavr:uno2018",
     "configuration": "mode=off",
-    "port": "COM3"
+    "port": "COM5"
 }

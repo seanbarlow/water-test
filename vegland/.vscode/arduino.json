@@ -1,0 +1,5 @@
+{
+    "board": "arduino:avr:unowifi",
+    "sketch": "vegland.ino",
+    "port": "COM5"
+}

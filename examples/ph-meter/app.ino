@@ -4,13 +4,13 @@
 namespace pin
 {
     const byte ph_sensor = A0;
-    const int lcd_rs = 12;
-    const int lcd_rw = 11;
-    const int lcd_en = 10;
-    const int lcd_db4 = 5;
-    const int lcd_db5 = 4;
-    const int lcd_db6 = 3;
-    const int lcd_db7 = 2;
+    const int lcd_rs = 2;
+    const int lcd_rw = 3;
+    const int lcd_en = 4;
+    const int lcd_db4 = 9;
+    const int lcd_db5 = 10;
+    const int lcd_db6 = 11;
+    const int lcd_db7 = 12;
 } // namespace pin
 
 namespace sensor
